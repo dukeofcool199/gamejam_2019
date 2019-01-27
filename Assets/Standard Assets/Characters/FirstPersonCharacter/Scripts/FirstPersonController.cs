@@ -10,6 +10,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
     [RequireComponent(typeof (AudioSource))]
     public class FirstPersonController : MonoBehaviour
     {
+        bool thrusters = false;
+        bool hull = false;
+        bool windshield = false;
+        bool electronics = false;
+        bool fuel = false;
+        bool dog = false;
+
         [SerializeField] private bool m_IsWalking;
         [SerializeField] private float m_WalkSpeed;
         [SerializeField] private float m_RunSpeed;
@@ -41,6 +48,35 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private float m_NextStep;
         private bool m_Jumping;
         private AudioSource m_AudioSource;
+
+        //for detecting obtaining items
+        private void OnTriggerEnter(Collider other) {
+
+            String name = other.gameObject.name;
+
+            switch (name)
+            {
+                case "thrusters":
+                    thrusters = true;
+                    break;
+                case "hull":
+                    hull = true;
+                    break;
+                case "windshield":
+                    windshield = true;
+                    break;
+                case "electronics":
+                    electronics = true;
+                    break;
+                case "fuel":
+                    fuel = true;
+                    break;
+                case "dog":
+                    dog = true;
+                    break;
+            }
+        }
+
 
         // Use this for initialization
         private void Start()
@@ -242,6 +278,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void OnControllerColliderHit(ControllerColliderHit hit)
         {
+            String name = hit.gameObject.name;
+            if (!name.Equals("Terrain")) {
+                Debug.Log(name);
+            }
+
+
             Rigidbody body = hit.collider.attachedRigidbody;
             //dont move the rigidbody if the character is on top of it
             if (m_CollisionFlags == CollisionFlags.Below)
