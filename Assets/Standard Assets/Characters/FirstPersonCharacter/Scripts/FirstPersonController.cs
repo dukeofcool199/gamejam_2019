@@ -17,7 +17,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         bool fuelCell = false;
         bool dog = false;
 
-        GameObject finalSmoke;
+				int itemsLeft = 6;
 
         [SerializeField] private bool m_IsWalking;
         [SerializeField] private float m_WalkSpeed;
@@ -36,6 +36,14 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
+        [SerializeField] private AudioClip five_left;           // the sound played when character touches back on ground.
+        [SerializeField] private AudioClip four_left;           // the sound played when character touches back on ground.
+        [SerializeField] private AudioClip three_left;           // the sound played when character touches back on ground.
+        [SerializeField] private AudioClip two_left;           // the sound played when character touches back on ground.
+        [SerializeField] private AudioClip one_left;           // the sound played when character touches back on ground.
+        [SerializeField] private AudioClip dog_bark;           // the sound played when character touches back on ground.
+        [SerializeField] private AudioClip all_pieces;           // the sound played when character touches back on ground.
+
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -50,11 +58,14 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private float m_NextStep;
         private bool m_Jumping;
         private AudioSource m_AudioSource;
+				[SerializeField] private AudioSource other_AudioSource;
 
         //for detecting obtaining items
         private void OnTriggerEnter(Collider other) {
 
             String name = other.gameObject.name;
+						other_AudioSource.clip = null;
+						itemsLeft --;
 
             switch (name)
             {
@@ -75,17 +86,40 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     break;
                 case "dog":
                     dog = true;
+										other_AudioSource.clip = dog_bark;
+            other_AudioSource.Play();
                     break;
             }
 
+						if(!other_AudioSource.clip == dog_bark){
+
+						switch(itemsLeft){
+							case 5:
+										other_AudioSource.clip = five_left;
+							break;	
+							case 4:
+										other_AudioSource.clip = four_left;
+							break;	
+							case 3:
+										other_AudioSource.clip = three_left;
+							break;	
+							case 2:
+										other_AudioSource.clip = two_left;
+							break;	
+							case 1:
+										other_AudioSource.clip = one_left;
+							break;	
+							case 0:
+										other_AudioSource.clip = one_left;
+							break;
+
+
+						}
+							other_AudioSource.Play();
+						}
+
             Destroy(other.gameObject);
 
-            if (!finalSmoke.activeSelf) {
-                if (thrusters == true && hull == true && windshield == true && electronics == true &&
-                fuelCell == true && dog == true) {
-                    finalSmoke.SetActive(true);
-                }
-            }
         }
 
 
@@ -102,9 +136,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
-
-            finalSmoke = GameObject.Find("finalSmoke");
-            finalSmoke.SetActive(false);
         }
 
 
@@ -292,7 +323,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void OnControllerColliderHit(ControllerColliderHit hit)
         {
-            
+            String name = hit.gameObject.name;
+            if (!name.Equals("Terrain")) {
+                Debug.Log(name);
+            }
+
+
             Rigidbody body = hit.collider.attachedRigidbody;
             //dont move the rigidbody if the character is on top of it
             if (m_CollisionFlags == CollisionFlags.Below)
