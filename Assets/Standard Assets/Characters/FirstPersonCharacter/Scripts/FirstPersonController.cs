@@ -17,6 +17,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         bool fuelCell = false;
         bool dog = false;
 
+        GameObject finalSmoke;
+
         [SerializeField] private bool m_IsWalking;
         [SerializeField] private float m_WalkSpeed;
         [SerializeField] private float m_RunSpeed;
@@ -77,6 +79,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
 
             Destroy(other.gameObject);
+
+            if (!finalSmoke.activeSelf) {
+                if (thrusters == true && hull == true && windshield == true && electronics == true &&
+                fuelCell == true && dog == true) {
+                    finalSmoke.SetActive(true);
+                }
+            }
         }
 
 
@@ -93,6 +102,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
+
+            finalSmoke = GameObject.Find("finalSmoke");
+            finalSmoke.SetActive(false);
         }
 
 
@@ -280,12 +292,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void OnControllerColliderHit(ControllerColliderHit hit)
         {
-            String name = hit.gameObject.name;
-            if (!name.Equals("Terrain")) {
-                Debug.Log(name);
-            }
-
-
+            
             Rigidbody body = hit.collider.attachedRigidbody;
             //dont move the rigidbody if the character is on top of it
             if (m_CollisionFlags == CollisionFlags.Below)
