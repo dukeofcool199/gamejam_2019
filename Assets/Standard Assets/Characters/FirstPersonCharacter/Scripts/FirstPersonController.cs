@@ -14,7 +14,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         bool hull = false;
         bool windshield = false;
         bool electronics = false;
-        bool fuel = false;
+        bool fuelCell = false;
         bool dog = false;
 
         [SerializeField] private bool m_IsWalking;
@@ -68,13 +68,15 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 case "electronics":
                     electronics = true;
                     break;
-                case "fuel":
-                    fuel = true;
+                case "fuelCell":
+                    fuelCell = true;
                     break;
                 case "dog":
                     dog = true;
                     break;
             }
+
+            Destroy(other.gameObject);
         }
 
 
