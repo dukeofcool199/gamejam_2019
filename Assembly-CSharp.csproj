@@ -56,6 +56,7 @@
      <Compile Include="Assets\intro_dialogue.cs" />
      <Compile Include="Assets\loadScene.cs" />
      <Compile Include="Assets\My Assets\Collectible.cs" />
+     <Compile Include="Assets\My Assets\ship_controll.cs" />
      <Compile Include="Assets\SampleScenes\Menu\Scripts\MenuSceneLoader.cs" />
      <Compile Include="Assets\SampleScenes\Menu\Scripts\PauseMenu.cs" />
      <Compile Include="Assets\SampleScenes\Menu\Scripts\SceneAndURLLoader.cs" />
