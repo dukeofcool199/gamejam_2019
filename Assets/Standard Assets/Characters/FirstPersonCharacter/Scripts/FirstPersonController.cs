@@ -6,8 +6,8 @@ using Random = UnityEngine.Random;
 
 namespace UnityStandardAssets.Characters.FirstPerson
 {
-    [RequireComponent(typeof (CharacterController))]
-    [RequireComponent(typeof (AudioSource))]
+    [RequireComponent(typeof(CharacterController))]
+    [RequireComponent(typeof(AudioSource))]
     public class FirstPersonController : MonoBehaviour
     {
         bool thrusters = false;
@@ -17,7 +17,23 @@ namespace UnityStandardAssets.Characters.FirstPerson
         bool fuelCell = false;
         bool dog = false;
 
-				int itemsLeft = 6;
+        //for determining when all objects are place in circle
+        bool thrustersGood = false;
+        bool hullGood = false;
+        bool windshieldGood = false;
+        bool electronicsGood = false;
+        bool fuelCellGood = false;
+        bool dogGood = false;
+
+        int itemsLeft = 6;
+
+        bool toDestroy = true; //should start off true
+
+        GameObject finalSmoke;
+        GameObject DemonCircle;
+
+        //pieces and dog game objects, for instantiating
+
 
         [SerializeField] private bool m_IsWalking;
         [SerializeField] private float m_WalkSpeed;
@@ -44,6 +60,15 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip dog_bark;           // the sound played when character touches back on ground.
         [SerializeField] private AudioClip all_pieces;           // the sound played when character touches back on ground.
 
+        [SerializeField] GameObject thrustersObj;
+        [SerializeField] GameObject hullObj;
+        [SerializeField] GameObject windshieldObj;
+        [SerializeField] GameObject electronicsObj;
+        [SerializeField] GameObject fuelCellObj;
+        [SerializeField] GameObject dogObj;
+        [SerializeField] GameObject ghostShip;
+        [SerializeField] GameObject triggerCube;
+
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -58,67 +83,188 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private float m_NextStep;
         private bool m_Jumping;
         private AudioSource m_AudioSource;
-				[SerializeField] private AudioSource other_AudioSource;
+        [SerializeField] private AudioSource other_AudioSource;
 
         //for detecting obtaining items
-        private void OnTriggerEnter(Collider other) {
-
+        private void OnTriggerEnter(Collider other)
+        {
+            toDestroy=false;
             String name = other.gameObject.name;
-						other_AudioSource.clip = null;
-						itemsLeft --;
+            other_AudioSource.clip = null;
 
+            bool sayLine = false;
             switch (name)
             {
                 case "thrusters":
                     thrusters = true;
+                    sayLine = true;
+                    itemsLeft--;
+                    toDestroy=true;
                     break;
                 case "hull":
                     hull = true;
+                    sayLine = true;
+                    toDestroy=true;
+                    itemsLeft--;
                     break;
                 case "windshield":
                     windshield = true;
+                    sayLine = true;
+                    itemsLeft--;
+                    toDestroy=true;
                     break;
                 case "electronics":
                     electronics = true;
+                    sayLine = true;
+                    itemsLeft--;
+                    toDestroy=true;
                     break;
                 case "fuelCell":
                     fuelCell = true;
+                    sayLine = true;
+                    toDestroy=true;
+                    itemsLeft--;
                     break;
                 case "dog":
                     dog = true;
-										other_AudioSource.clip = dog_bark;
-            other_AudioSource.Play();
+                    other_AudioSource.clip = dog_bark;
+                    other_AudioSource.Play();
+                    sayLine = true;
+                    toDestroy=true;
+                    itemsLeft--;
                     break;
             }
 
-						if(!other_AudioSource.clip == dog_bark){
-
-						switch(itemsLeft){
-							case 5:
-										other_AudioSource.clip = five_left;
-							break;	
-							case 4:
-										other_AudioSource.clip = four_left;
-							break;	
-							case 3:
-										other_AudioSource.clip = three_left;
-							break;	
-							case 2:
-										other_AudioSource.clip = two_left;
-							break;	
-							case 1:
-										other_AudioSource.clip = one_left;
-							break;	
-							case 0:
-										other_AudioSource.clip = one_left;
-							break;
+            if (itemsLeft <= 0)
+            {
 
 
-						}
-							other_AudioSource.Play();
-						}
+                switch (name)
+                {
+                    case "thrusterPlace":
+                        if (!toDestroy)
+                        {
+                            if (!thrustersGood && thrusters)
+                                Instantiate(thrustersObj, other.gameObject.transform);
+                            if (itemsLeft == 0)
+                                thrustersGood = true;
+                        }
+                        break;
+                    case "hullPlace":
+                        if (!toDestroy)
+                        {
+                            if (!hullGood && hull)
+                                Instantiate(hullObj, other.gameObject.transform);
+                            if (itemsLeft == 0)
+                                hullGood = true;
+                        }
+                        break;
+                    case "windshieldPlace":
+                        if (!toDestroy)
+                        {
+                            if (!windshieldGood && windshield)
+                                Instantiate(windshieldObj, other.gameObject.transform);
+                            if (itemsLeft == 0)
+                                windshieldGood = true;
+                        }
+                        break;
+                    case "electronicsPlace":
+                        if (!toDestroy)
+                        {
+                            if (!electronicsGood && electronics)
+                                Instantiate(electronicsObj, other.gameObject.transform);
+                            if (itemsLeft == 0)
+                                electronicsGood = true;
+                        }
+                        break;
+                    case "fuelCellPlace":
+                        if (!toDestroy)
+                        {
+                            if (!fuelCellGood && fuelCell)
+                                Instantiate(fuelCellObj, other.gameObject.transform);
+                            if (itemsLeft == 0)
+                                fuelCellGood = true;
+                        }
+                        break;
+                    case "dogPlace":
+                        if (!toDestroy)
+                        {
+                            if (!dogGood && dog)
+                                Instantiate(dogObj, other.gameObject.transform);
+                            if (itemsLeft == 0)
+                                dogGood = true;
+                        }
+                        break;
 
-            Destroy(other.gameObject);
+                    case "TriggerCube":
+
+                        Debug.Log("trigger cube");
+                        ghostShip.SetActive(true);
+                        Destroy(GameObject.Find("hull(Clone)"));
+                        Destroy(GameObject.Find("thrusters(Clone)"));
+                        Destroy(GameObject.Find("circuitboard(Clone)"));
+                        Destroy(GameObject.Find("french_bulldog(Clone)"));
+                        Destroy(GameObject.Find("fuelCell(Clone)"));
+                        Destroy(GameObject.Find("windshield(Clone)"));
+                        break;
+                }
+            }
+
+            if (thrustersGood == true && hullGood == true && windshieldGood == true &&
+            electronicsGood == true && fuelCellGood == true && dogGood == true)
+            {
+                triggerCube.SetActive(true);
+            }
+
+            if (!other_AudioSource.clip == dog_bark)
+            {
+                if (sayLine)
+                {
+
+
+                    switch (itemsLeft)
+                    {
+                        case 5:
+                            other_AudioSource.clip = five_left;
+                            break;
+                        case 4:
+                            other_AudioSource.clip = four_left;
+                            break;
+                        case 3:
+                            other_AudioSource.clip = three_left;
+                            break;
+                        case 2:
+                            other_AudioSource.clip = two_left;
+                            break;
+                        case 1:
+                            other_AudioSource.clip = one_left;
+                            break;
+                        case 0:
+                            other_AudioSource.clip = all_pieces;
+                            break;
+                    }
+                    other_AudioSource.Play();
+                }
+
+            }
+
+
+            //enable final smoke when all objects collected
+            if (toDestroy)
+            {
+                Destroy(other.gameObject);
+
+                if (thrusters == true && hull == true && windshield == true &&
+                electronics == true && fuelCell == true && dog == true)
+                {
+                    finalSmoke.SetActive(true);
+                    DemonCircle.SetActive(true);
+        
+                }
+            }
+
+
+
 
         }
 
@@ -132,10 +278,17 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_FovKick.Setup(m_Camera);
             m_HeadBob.Setup(m_Camera, m_StepInterval);
             m_StepCycle = 0f;
-            m_NextStep = m_StepCycle/2f;
+            m_NextStep = m_StepCycle / 2f;
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
-			m_MouseLook.Init(transform , m_Camera.transform);
+            m_MouseLook.Init(transform, m_Camera.transform);
+
+            finalSmoke = GameObject.Find("finalSmoke");
+            finalSmoke.SetActive(false);
+            DemonCircle = GameObject.Find("DemonCircle");
+            DemonCircle.SetActive(false);
+            ghostShip.SetActive(false);
+            triggerCube.SetActive(false);
         }
 
 
@@ -152,7 +305,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (!m_PreviouslyGrounded && m_CharacterController.isGrounded)
             {
                 StartCoroutine(m_JumpBob.DoBobCycle());
-                PlayLandingSound();
+                //PlayLandingSound();
                 m_MoveDir.y = 0f;
                 m_Jumping = false;
             }
@@ -178,16 +331,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
             float speed;
             GetInput(out speed);
             // always move along the camera forward as it is the direction that it being aimed at
-            Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
+            Vector3 desiredMove = transform.forward * m_Input.y + transform.right * m_Input.x;
 
             // get a normal for the surface that is being touched to move along it
             RaycastHit hitInfo;
             Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
-                               m_CharacterController.height/2f, Physics.AllLayers, QueryTriggerInteraction.Ignore);
+                               m_CharacterController.height / 2f, Physics.AllLayers, QueryTriggerInteraction.Ignore);
             desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
 
-            m_MoveDir.x = desiredMove.x*speed;
-            m_MoveDir.z = desiredMove.z*speed;
+            m_MoveDir.x = desiredMove.x * speed;
+            m_MoveDir.z = desiredMove.z * speed;
 
 
             if (m_CharacterController.isGrounded)
@@ -197,16 +350,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 if (m_Jump)
                 {
                     m_MoveDir.y = m_JumpSpeed;
-                    PlayJumpSound();
+                    //PlayJumpSound();
                     m_Jump = false;
                     m_Jumping = true;
                 }
             }
             else
             {
-                m_MoveDir += Physics.gravity*m_GravityMultiplier*Time.fixedDeltaTime;
+                m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
             }
-            m_CollisionFlags = m_CharacterController.Move(m_MoveDir*Time.fixedDeltaTime);
+            m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
 
             ProgressStepCycle(speed);
             UpdateCameraPosition(speed);
@@ -226,7 +379,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             if (m_CharacterController.velocity.sqrMagnitude > 0 && (m_Input.x != 0 || m_Input.y != 0))
             {
-                m_StepCycle += (m_CharacterController.velocity.magnitude + (speed*(m_IsWalking ? 1f : m_RunstepLenghten)))*
+                m_StepCycle += (m_CharacterController.velocity.magnitude + (speed * (m_IsWalking ? 1f : m_RunstepLenghten))) *
                              Time.fixedDeltaTime;
             }
 
@@ -237,7 +390,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             m_NextStep = m_StepCycle + m_StepInterval;
 
-            PlayFootStepAudio();
+            //PlayFootStepAudio();
         }
 
 
@@ -269,7 +422,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 m_Camera.transform.localPosition =
                     m_HeadBob.DoHeadBob(m_CharacterController.velocity.magnitude +
-                                      (speed*(m_IsWalking ? 1f : m_RunstepLenghten)));
+                                      (speed * (m_IsWalking ? 1f : m_RunstepLenghten)));
                 newCameraPosition = m_Camera.transform.localPosition;
                 newCameraPosition.y = m_Camera.transform.localPosition.y - m_JumpBob.Offset();
             }
@@ -317,18 +470,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void RotateView()
         {
-            m_MouseLook.LookRotation (transform, m_Camera.transform);
+            m_MouseLook.LookRotation(transform, m_Camera.transform);
         }
 
 
         private void OnControllerColliderHit(ControllerColliderHit hit)
         {
-            String name = hit.gameObject.name;
-            if (!name.Equals("Terrain")) {
-                Debug.Log(name);
-            }
-
-
             Rigidbody body = hit.collider.attachedRigidbody;
             //dont move the rigidbody if the character is on top of it
             if (m_CollisionFlags == CollisionFlags.Below)
@@ -340,7 +487,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 return;
             }
-            body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
+            body.AddForceAtPosition(m_CharacterController.velocity * 0.1f, hit.point, ForceMode.Impulse);
         }
     }
 }
